@@ -352,7 +352,7 @@ img {
     color: var(--text-primary);
 }
 
-.name-line.accent {
+.name-line .accent {
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
