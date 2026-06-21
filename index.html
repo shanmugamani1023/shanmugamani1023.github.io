@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shanmugamani | Computer Vision & ML Engineer</title>
+    <meta name="description" content="Portfolio of Shanmugamani – Computer Vision and Machine Learning Engineer specializing in deep learning, AI applications, and autonomous retail solutions.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="navbar">
+        <div class="nav-container">
+            <a href="#hero" class="nav-logo">
+                <span class="logo-bracket">&lt;</span>SM<span class="logo-bracket">/&gt;</span>
+            </a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#skills" class="nav-link">Skills</a></li>
+                <li><a href="#experience" class="nav-link">Experience</a></li>
+                <li><a href="#education" class="nav-link">Education</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <p class="hero-greeting" data-animate="fade-up">Hello, I'm</p>
+                <h1 class="hero-name" data-animate="fade-up" data-delay="100">
+                    <span class="name-line">Shanmuga</span>
+                    <span class="name-line accent">mani</span>
+                </h1>
+                <div class="hero-role-wrapper" data-animate="fade-up" data-delay="200">
+                    <div class="role-tag">
+                        <span class="role-dot"></span>
+                        <span id="typed-text" class="typed-text"></span>
+                        <span class="cursor">|</span>
+                    </div>
+                </div>
+                <p class="hero-description" data-animate="fade-up" data-delay="300">
+                    Computer Vision & Machine Learning Engineer with proven experience
+                    in deploying AI-driven solutions, focusing on deep learning and innovative approaches.
+                </p>
+                <div class="hero-cta" data-animate="fade-up" data-delay="400">
+                    <a href="#experience" class="btn btn-primary">
+                        <span>View My Work</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#contact" class="btn btn-secondary">
+                        <span>Get In Touch</span>
+                    </a>
+                </div>
+                <div class="hero-stats" data-animate="fade-up" data-delay="500">
+                    <div class="stat">
+                        <span class="stat-number" data-count="4">0</span><span class="stat-plus">+</span>
+                        <span class="stat-label">Years Experience</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-number" data-count="95">0</span><span class="stat-plus">%</span>
+                        <span class="stat-label">Model Accuracy</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-number" data-count="10">0</span><span class="stat-plus">+</span>
+                        <span class="stat-label">Projects Delivered</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual" data-animate="fade-left" data-delay="200">
+                <div class="avatar-wrapper">
+                    <div class="avatar-ring"></div>
+                    <div class="avatar-ring ring-2"></div>
+                    <div class="avatar-glow"></div>
+                    <div class="avatar-container">
+                        <div class="avatar-initials">SM</div>
+                    </div>
+                </div>
+                <!-- Floating tech badges -->
+                <div class="floating-badge badge-1">🧠 Deep Learning</div>
+                <div class="floating-badge badge-2">👁️ Computer Vision</div>
+                <div class="floating-badge badge-3">🤖 AI Solutions</div>
+                <div class="floating-badge badge-4">📊 Data Science</div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <span>Scroll Down</span>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section about">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-tag">01 / About</span>
+                <h2 class="section-title">Who I Am</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="about-grid">
+                <div class="about-text" data-animate="fade-right">
+                    <p class="about-lead">
+                        I'm a <strong>Computer Vision and Machine Learning Engineer</strong> with a passion for
+                        transforming complex visual data into intelligent, actionable solutions.
+                    </p>
+                    <p>
+                        With extensive experience in deploying AI-driven solutions, I specialize in deep learning,
+                        computer vision, and practical AI applications. I've demonstrated expertise in reducing
+                        process times dramatically — from minutes to seconds — while achieving 95%+ model accuracy
+                        through innovative approaches and cross-functional collaboration.
+                    </p>
+                    <p>
+                        From autonomous retail systems to industrial inspection solutions, I build AI that
+                        works in the real world — fast, accurate, and production-ready.
+                    </p>
+                    <div class="about-highlights">
+                        <div class="highlight-item">
+                            <div class="highlight-icon">⚡</div>
+                            <div>
+                                <h4>Speed Optimization</h4>
+                                <p>Reduced inspection time from 3 min to 3 sec</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">🎯</div>
+                            <div>
+                                <h4>High Accuracy</h4>
+                                <p>Achieved 95%+ accuracy across multiple models</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">🚀</div>
+                            <div>
+                                <h4>Production Ready</h4>
+                                <p>End-to-end deployment of CV pipelines</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-card" data-animate="fade-left">
+                    <div class="card-glass">
+                        <div class="card-header">
+                            <div class="terminal-dots">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </div>
+                            <span class="card-title">profile.json</span>
+                        </div>
+                        <pre class="card-code"><code>{
+  <span class="key">"name"</span>: <span class="string">"Shanmugamani"</span>,
+  <span class="key">"role"</span>: <span class="string">"CV & ML Engineer"</span>,
+  <span class="key">"location"</span>: <span class="string">"India"</span>,
+  <span class="key">"experience"</span>: <span class="number">"4+ years"</span>,
+  <span class="key">"specialization"</span>: [
+    <span class="string">"Computer Vision"</span>,
+    <span class="string">"Deep Learning"</span>,
+    <span class="string">"Image Processing"</span>,
+    <span class="string">"Generative AI"</span>
+  ],
+  <span class="key">"currently"</span>: <span class="string">"Senior Software Engineer @ Digit7"</span>,
+  <span class="key">"education"</span>: <span class="string">"B.E Mechanical Engineering"</span>,
+  <span class="key">"passion"</span>: <span class="string">"Building AI that works in the real world"</span>
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section skills">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-tag">02 / Skills</span>
+                <h2 class="section-title">Tech Arsenal</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="skills-grid">
+                <!-- Programming -->
+                <div class="skill-category" data-animate="fade-up" data-delay="0">
+                    <div class="skill-card-glass">
+                        <div class="skill-icon">💻</div>
+                        <h3>Programming</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">PHP</span>
+                            <span class="skill-tag">HTML5</span>
+                            <span class="skill-tag">CSS</span>
+                            <span class="skill-tag">JavaScript</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- AI / ML -->
+                <div class="skill-category" data-animate="fade-up" data-delay="100">
+                    <div class="skill-card-glass">
+                        <div class="skill-icon">🧠</div>
+                        <h3>AI & Machine Learning</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag highlight">Deep Learning</span>
+                            <span class="skill-tag highlight">Computer Vision</span>
+                            <span class="skill-tag">Generative AI</span>
+                            <span class="skill-tag">Data Science</span>
+                            <span class="skill-tag">Image Processing</span>
+                            <span class="skill-tag">Multimodal Analysis</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Frameworks -->
+                <div class="skill-category" data-animate="fade-up" data-delay="200">
+                    <div class="skill-card-glass">
+                        <div class="skill-icon">🔧</div>
+                        <h3>Frameworks & Tools</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">PyTorch</span>
+                            <span class="skill-tag">TensorFlow</span>
+                            <span class="skill-tag">OpenCV</span>
+                            <span class="skill-tag">YOLO</span>
+                            <span class="skill-tag">Scikit-learn</span>
+                            <span class="skill-tag">Pandas</span>
+                            <span class="skill-tag">NumPy</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Specialized -->
+                <div class="skill-category" data-animate="fade-up" data-delay="300">
+                    <div class="skill-card-glass">
+                        <div class="skill-icon">🎯</div>
+                        <h3>Specialized Tools</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Parseq</span>
+                            <span class="skill-tag">Pyzbar</span>
+                            <span class="skill-tag">SAM</span>
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">Git</span>
+                            <span class="skill-tag">Pytesseract</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="section experience">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-tag">03 / Experience</span>
+                <h2 class="section-title">Career Journey</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="timeline">
+                <!-- Digit7 -->
+                <div class="timeline-item" data-animate="fade-up">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                        <div class="marker-line"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-card-glass">
+                            <div class="timeline-header">
+                                <div>
+                                    <h3 class="timeline-role">Senior Software Engineer</h3>
+                                    <p class="timeline-company">Digit7</p>
+                                </div>
+                                <span class="timeline-date">Dec 2024 – Present</span>
+                            </div>
+                            <div class="timeline-body">
+                                <div class="project-block">
+                                    <h4 class="project-title">
+                                        <span class="project-icon">🛒</span>
+                                        Autonomous Retail / Computer Vision
+                                    </h4>
+                                    <ul class="project-details">
+                                        <li>Developed computer vision solutions for autonomous retail stores, including product identification, pose estimation, face masking, and cooler product monitoring</li>
+                                        <li>Improved model accuracy from <strong>80% to 95%</strong> by optimizing vision pipelines and production workflows</li>
+                                    </ul>
+                                    <div class="tech-stack">
+                                        <span>OpenCV</span><span>SAM</span><span>Docker</span><span>Git</span><span>YOLO</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Shrav Infotech -->
+                <div class="timeline-item" data-animate="fade-up" data-delay="100">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                        <div class="marker-line"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-card-glass">
+                            <div class="timeline-header">
+                                <div>
+                                    <h3 class="timeline-role">Computer Vision Engineer</h3>
+                                    <p class="timeline-company">Shrav Infotech</p>
+                                </div>
+                                <span class="timeline-date">Dec 2021 – Nov 2024</span>
+                            </div>
+                            <div class="timeline-body">
+                                <div class="project-block">
+                                    <h4 class="project-title">
+                                        <span class="project-icon">🔍</span>
+                                        Air-Filter Inspection System
+                                    </h4>
+                                    <ul class="project-details">
+                                        <li>Engineered a CV-based Air Filter Inspection System, reducing inspection time from <strong>3 minutes to 3 seconds</strong> per unit with 95% accuracy</li>
+                                        <li>Integrated OpenCV with custom image processing pipelines to enhance efficiency and precision in quality control</li>
+                                    </ul>
+                                    <div class="tech-stack">
+                                        <span>OpenCV</span><span>Pyzbar</span><span>Pytesseract</span>
+                                    </div>
+                                </div>
+                                <div class="project-block">
+                                    <h4 class="project-title">
+                                        <span class="project-icon">📋</span>
+                                        Automatic Image Proofing System
+                                    </h4>
+                                    <ul class="project-details">
+                                        <li>Developed an end-to-end Automatic Image Proofing System using OCR and QR code scanning for product ID verification</li>
+                                        <li>Improved verification speed from <strong>2 minutes to 3 seconds</strong> per image with 96% OCR accuracy and 94% object detection precision</li>
+                                    </ul>
+                                    <div class="tech-stack">
+                                        <span>OpenCV</span><span>Pyzbar</span><span>Parseq</span><span>YOLO</span>
+                                    </div>
+                                </div>
+                                <div class="project-block">
+                                    <h4 class="project-title">
+                                        <span class="project-icon">🔤</span>
+                                        Engraved Text Detection System
+                                    </h4>
+                                    <ul class="project-details">
+                                        <li>Designed and deployed an OCR-based system to detect and validate engraved part numbers across LH and RH components</li>
+                                        <li>Overcame text variability challenges using custom pre-processing techniques and proposed real-time deployment strategies</li>
+                                    </ul>
+                                    <div class="tech-stack">
+                                        <span>OpenCV</span><span>Parseq</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education" class="section education">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-tag">04 / Education & Certifications</span>
+                <h2 class="section-title">Learning Path</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="edu-grid">
+                <div class="edu-card" data-animate="fade-up">
+                    <div class="edu-card-glass">
+                        <div class="edu-icon">🎓</div>
+                        <h3>B.E Mechanical Engineering</h3>
+                        <p class="edu-school">Dhirajlal Gandhi College of Technology, Salem</p>
+                        <div class="edu-meta">
+                            <span class="edu-year">2017</span>
+                            <span class="edu-gpa">CGPA: 7.6</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cert-list" data-animate="fade-up" data-delay="100">
+                    <div class="cert-item">
+                        <div class="cert-glass">
+                            <div class="cert-badge">📜</div>
+                            <div>
+                                <h4>Machine Learning Specialization</h4>
+                                <p>Coursera</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cert-item">
+                        <div class="cert-glass">
+                            <div class="cert-badge">📜</div>
+                            <div>
+                                <h4>Data Science Masters Course</h4>
+                                <p>PW Skills</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cert-item">
+                        <div class="cert-glass">
+                            <div class="cert-badge">📜</div>
+                            <div>
+                                <h4>Web Development Course</h4>
+                                <p>Accord Info Matrix</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section contact">
+        <div class="container">
+            <div class="section-header" data-animate="fade-up">
+                <span class="section-tag">05 / Contact</span>
+                <h2 class="section-title">Let's Connect</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info" data-animate="fade-right">
+                    <p class="contact-lead">
+                        Interested in collaborating on AI/CV projects or have an opportunity?
+                        I'd love to hear from you.
+                    </p>
+                    <div class="contact-links">
+                        <a href="mailto:shanmugamanimeyialagan@gmail.com" class="contact-link" id="contact-email">
+                            <div class="contact-link-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg>
+                            </div>
+                            <div>
+                                <span class="contact-link-label">Email</span>
+                                <span class="contact-link-value">shanmugamanimeyialagan@gmail.com</span>
+                            </div>
+                        </a>
+                        <a href="tel:+917402320768" class="contact-link" id="contact-phone">
+                            <div class="contact-link-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                            </div>
+                            <div>
+                                <span class="contact-link-label">Phone</span>
+                                <span class="contact-link-value">+91-7402320768</span>
+                            </div>
+                        </a>
+                        <a href="https://github.com/shanmugamani1023" target="_blank" rel="noopener" class="contact-link" id="contact-github">
+                            <div class="contact-link-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            </div>
+                            <div>
+                                <span class="contact-link-label">GitHub</span>
+                                <span class="contact-link-value">shanmugamani1023</span>
+                            </div>
+                        </a>
+                        <a href="https://linkedin.com/in/shanmugamani/" target="_blank" rel="noopener" class="contact-link" id="contact-linkedin">
+                            <div class="contact-link-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                            </div>
+                            <div>
+                                <span class="contact-link-label">LinkedIn</span>
+                                <span class="contact-link-value">shanmugamani</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="contact-form-wrapper" data-animate="fade-left">
+                    <form class="contact-form" id="contact-form">
+                        <div class="form-group">
+                            <label for="form-name">Your Name</label>
+                            <input type="text" id="form-name" name="name" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-email">Your Email</label>
+                            <input type="email" id="form-email" name="email" required placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-message">Message</label>
+                            <textarea id="form-message" name="message" rows="5" required placeholder="Tell me about your project..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full" id="form-submit">
+                            <span>Send Message</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-text">
+                    <span class="logo-bracket">&lt;</span> Designed & Built by Shanmugamani <span class="logo-bracket">/&gt;</span>
+                </p>
+                <p class="footer-copyright">© 2026 All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
