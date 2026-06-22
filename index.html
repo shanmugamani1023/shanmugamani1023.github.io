@@ -40,6 +40,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="athena.css">
 </head>
 <body>
     <!-- Animated background particles -->
@@ -753,6 +754,79 @@
         </div>
     </footer>
 
+    <!-- ATHENA — AI Voice & Chat Assistant -->
+    <!-- Floating Orb -->
+    <button id="athena-orb" class="athena-welcome-anim" aria-label="Talk to Athena AI">
+        <svg class="orb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="athena-notif-dot" id="athena-notif" style="display:none"></span>
+    </button>
+
+    <!-- Chat Panel -->
+    <div id="athena-panel">
+        <!-- Header -->
+        <div class="athena-header">
+            <div class="athena-avatar">
+                A
+                <span class="athena-avatar-dot"></span>
+            </div>
+            <div class="athena-header-info">
+                <div class="athena-header-title">
+                    <span class="athena-name-accent">Athena</span>
+                    AI
+                </div>
+                <div class="athena-header-status">Online</div>
+            </div>
+            <button id="athena-close" class="athena-close-btn" aria-label="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="athena-messages" id="athena-messages">
+            <!-- Typing indicator -->
+            <div class="athena-typing" id="athena-typing">
+                <div class="athena-msg-avatar">A</div>
+                <div class="athena-typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+            <!-- Voice wave -->
+            <div class="athena-wave" id="athena-wave">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <!-- Quick Replies -->
+        <div class="athena-quick-replies">
+            <button class="athena-chip" data-query="Tell me about Shanmugamani">About</button>
+            <button class="athena-chip" data-query="What skills does Shanmugamani have?">Skills</button>
+            <button class="athena-chip" data-query="Show me the projects">Projects</button>
+            <button class="athena-chip" data-query="What is Shanmugamani's experience?">Experience</button>
+            <button class="athena-chip" data-query="How can I contact Shanmugamani?">Contact</button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="athena-input-area">
+            <button id="athena-mic" class="athena-mic-btn" aria-label="Voice input">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+            </button>
+            <input type="text" id="athena-input" class="athena-input" placeholder="Ask me anything..." autocomplete="off">
+            <button id="athena-send" class="athena-send-btn" aria-label="Send">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script src="athena.js"></script>
 </body>
 </html>
