@@ -272,6 +272,89 @@ class Navbar {
 }
 
 /* ==========================================
+   THEME MANAGER (Dark/Light Toggle)
+   ========================================== */
+class ThemeManager {
+    constructor() {
+        this.toggle = document.getElementById('theme-toggle');
+        this.storageKey = 'portfolio-theme';
+        this.init();
+    }
+
+    init() {
+        // Restore saved preference or default to dark
+        const saved = localStorage.getItem(this.storageKey);
+        if (saved === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+
+        this.toggle.addEventListener('click', () => this.toggleTheme());
+    }
+
+    toggleTheme() {
+        const html = document.documentElement;
+        const isLight = html.getAttribute('data-theme') === 'light';
+
+        if (isLight) {
+            html.removeAttribute('data-theme');
+            localStorage.setItem(this.storageKey, 'dark');
+        } else {
+            html.setAttribute('data-theme', 'light');
+            localStorage.setItem(this.storageKey, 'light');
+        }
+
+        // Add a subtle rotation animation to the toggle icon
+        this.toggle.style.transform = 'rotate(180deg)';
+        setTimeout(() => {
+            this.toggle.style.transform = '';
+        }, 300);
+    }
+}
+
+/* ==========================================
+   PROJECT FILTER
+   ========================================== */
+class ProjectFilter {
+    constructor() {
+        this.filters = document.querySelectorAll('.filter-btn');
+        this.cards = document.querySelectorAll('.project-showcase-card');
+        this.init();
+    }
+
+    init() {
+        this.filters.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+                this.setActive(btn);
+                this.filterCards(filter);
+            });
+        });
+    }
+
+    setActive(activeBtn) {
+        this.filters.forEach((btn) => btn.classList.remove('active'));
+        activeBtn.classList.add('active');
+    }
+
+    filterCards(filter) {
+        this.cards.forEach((card) => {
+            const category = card.dataset.category;
+            if (filter === 'all' || category === filter) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
+
+    destroy() {
+        this.filters.forEach((btn) => {
+            btn.replaceWith(btn.cloneNode(true));
+        });
+    }
+}
+
+/* ==========================================
    CONTACT FORM
    ========================================== */
 class ContactForm {
@@ -338,6 +421,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Counter animations
     new CounterAnimator();
+
+    // Theme toggle
+    new ThemeManager();
+
+    // Project filter
+    new ProjectFilter();
 
     // Contact form
     new ContactForm();
