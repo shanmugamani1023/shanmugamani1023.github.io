@@ -42,33 +42,27 @@ class Athena {
 
     /* ========== API Key Management ========== */
     async loadApiKey() {
-        // Load API key from config/.env (works on both localhost and GitHub Pages)
+        // Load API key from config/config.json
         try {
-            const res = await fetch('config/.env');
-            const content = await res.text();
-            const match = content.match(/^ATHENA_API_KEY=(.+)$/m);
-            if (match && match[1].trim()) {
-                this.apiKey = match[1].trim();
-                if (this.apiKey && this.apiKey !== 'your_gemini_api_key_here') {
-                    console.log('Athena: API key loaded from config/.env');
-                    this.scheduleGreeting();
-                    return;
-                }
+            const res = await fetch('config/config.json');
+            const data = await res.json();
+            if (data && data.ATHENA_API_KEY && data.ATHENA_API_KEY !== 'your_gemini_api_key_here') {
+                this.apiKey = data.ATHENA_API_KEY;
+                console.log('Athena: API key loaded from config/config.json');
+                this.scheduleGreeting();
+                return;
             }
         } catch {
-            console.warn('Athena: Could not load config/.env. Make sure the file exists with your API key.');
+            // config.json not found — may need to create it
         }
 
-        // If no valid key found, show warning in console
-        if (!this.apiKey || this.apiKey === 'your_gemini_api_key_here') {
-            console.warn(
-                'Athena: No valid API key found.\n' +
-                '1. Open config/.env\n' +
-                '2. Replace your_gemini_api_key_here with your actual Gemini API key\n' +
-                '3. Get a free key at: https://aistudio.google.com/apikey\n' +
-                '4. Restrict it by HTTP referrer in Google Cloud Console'
-            );
-        }
+        console.warn(
+            'Athena: No valid API key found.\n' +
+            '1. Open config/config.json\n' +
+            '2. Replace your_gemini_api_key_here with your actual Gemini API key\n' +
+            '3. Get a free key at: https://aistudio.google.com/apikey\n' +
+            '4. Restrict it by HTTP referrer in Google Cloud Console to prevent abuse'
+        );
     }
 
     /* ========== Speech Recognition ========== */
