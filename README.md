@@ -47,18 +47,41 @@ python -m http.server 8080
 
 ### 2. Set up Athena (AI Assistant)
 
-Athena uses Google's Gemini API. To enable her:
+Athena uses **multi-provider fallback** — if one AI service is down or rate-limited, it automatically tries the next. Currently supports:
 
-1. **Get a free API key** → [Google AI Studio](https://aistudio.google.com/apikey) (needs a Google account)
-2. **Open `config/.env`** and replace the placeholder:
+| Provider | Type | Free Tier |
+|---|---|---|
+| **Gemini** (primary) | Google Gemini 3.5 Flash | 60 req/min |
+| **Groq** (fallback) | Llama 3.1 8B via Groq | 30 req/min |
+
+#### Setup
+
+1. **Copy the example config** (one time only):
+   ```bash
+   cp config/config.example.json config/config.json
    ```
-   ATHENA_API_KEY=your_gemini_api_key_here
+
+2. **Open `config/config.json`** and add your API keys:
+   ```json
+   {
+     "ATHENA_API_KEY": "AIzaSy...your-actual-gemini-key",
+     "GROQ_API_KEY": "gsk_your-actual-groq-key"
+   }
    ```
-   → `ATHENA_API_KEY=AIzaSy...your-actual-key`
-3. **Restrict the key** in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
-   - Edit your API key → Application restrictions → HTTP referrers
-   - Add `localhost:*` (development) and `shanmugamani1023.github.io` (production)
-4. **Refresh the page** — Athena will greet you after 3.5 seconds!
+
+3. **Get API keys:**
+   - **Gemini** → [Google AI Studio](https://aistudio.google.com/apikey) (free, needs Google account)
+   - **Groq** → [Groq Console](https://console.groq.com/keys) (free, needs account)
+
+4. **Restrict keys by HTTP referrer** for security:
+   - **Gemini**: [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → Edit key → HTTP referrers → add `localhost:*` and `shanmugamani1023.github.io`
+   - **Groq**: [Groq API Keys](https://console.groq.com/keys) → Edit key → Allowed HTTP referrers
+
+5. **Refresh the page** — Athena will greet you after 3.5 seconds!
+
+> ⚠️ **`config/config.json` is gitignored** — your real API keys stay local and never get committed. Only `config/config.example.json` (with placeholders) is pushed to GitHub.
+>
+> **Only need one provider?** That's fine — Athena works with just Gemini or just Groq. Add whichever keys you have.
 
 ### 3. Deploy to GitHub Pages
 ```bash

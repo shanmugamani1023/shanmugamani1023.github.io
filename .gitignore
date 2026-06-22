@@ -9,3 +9,6 @@ nul
 
 # Node (if any)
 node_modules/
+
+# API keys — real config stays local, only example file is committed
+config/config.json

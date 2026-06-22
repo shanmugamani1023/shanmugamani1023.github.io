@@ -1,6 +1,6 @@
 /* ==========================================
    ATHENA — AI Voice & Chat Assistant
-   Powered by Google Gemini API
+   Multi-Provider Fallback System
    ========================================== */
 
 class Athena {
@@ -17,7 +17,12 @@ class Athena {
         this.waveIndicator = document.getElementById('athena-wave');
         this.notifDot = document.getElementById('athena-notif');
 
-        this.apiKey = null;
+        // API keys loaded from config/config.json
+        this.apiKeys = {};
+        // Available providers (populated after keys load)
+        this.providers = [];
+        // Currently active provider
+        this.activeProvider = null;
 
         this.isOpen = false;
         this.isListening = false;
@@ -37,35 +42,121 @@ class Athena {
 
         this.bindEvents();
         this.initSpeech();
-        this.loadApiKey();
+        this.loadApiKeys();
     }
 
-    /* ========== API Key Management ========== */
-    async loadApiKey() {
-        // Load API key from config/config.json
-        try {
-            const res = await fetch('config/config.json');
-            const data = await res.json();
-            if (data && data.ATHENA_API_KEY && data.ATHENA_API_KEY !== 'your_gemini_api_key_here') {
-                this.apiKey = data.ATHENA_API_KEY;
-                console.log('Athena: API key loaded from config/config.json');
+    /* ========== API Key & Provider Management ========== */
+
+    async loadApiKeys() {
+        // Try user's local config first (config/config.json, gitignored)
+        // If no valid keys found, try the example file deployed to GitHub Pages
+        for (const path of ['config/config.json', 'config/config.example.json']) {
+            let data = null;
+            try {
+                const res = await fetch(path);
+                if (res.ok) data = await res.json();
+            } catch { continue; }
+
+            if (!data) continue;
+
+            if (data.ATHENA_API_KEY && data.ATHENA_API_KEY !== 'your_gemini_api_key_here') {
+                this.apiKeys.gemini = data.ATHENA_API_KEY;
+            }
+            if (data.GROQ_API_KEY && data.GROQ_API_KEY !== 'your_groq_api_key_here') {
+                this.apiKeys.groq = data.GROQ_API_KEY;
+            }
+
+            if (this.apiKeys.gemini) this.providers.push(this._geminiProvider());
+            if (this.apiKeys.groq)  this.providers.push(this._groqProvider());
+
+            if (this.providers.length > 0) {
+                console.log(`Athena: ${this.providers.length} AI provider(s) ready — ${this.providers.map(p => p.label).join(', ')}`);
                 this.scheduleGreeting();
                 return;
             }
-        } catch {
-            // config.json not found — may need to create it
         }
 
         console.warn(
-            'Athena: No valid API key found.\n' +
-            '1. Open config/config.json\n' +
-            '2. Replace your_gemini_api_key_here with your actual Gemini API key\n' +
-            '3. Get a free key at: https://aistudio.google.com/apikey\n' +
-            '4. Restrict it by HTTP referrer in Google Cloud Console to prevent abuse'
+            'Athena: No API keys found.\n' +
+            '1. Copy config/config.example.json to config/config.json\n' +
+            '2. Add your actual API keys to config/config.json\n' +
+            '3. Restrict keys by HTTP referrer for security'
         );
     }
 
+    /* ---------- Provider Definitions ---------- */
+
+    _geminiProvider() {
+        return {
+            id: 'gemini',
+            label: 'Gemini',
+            model: 'gemini-3.5-flash',
+            buildRequest: (systemPrompt, conversation, query) => {
+                const contents = [];
+                const recent = conversation.slice(-12);
+                recent.forEach(msg => {
+                    contents.push({ role: msg.role === 'athena' ? 'model' : 'user', parts: [{ text: msg.text }] });
+                });
+                contents.push({ role: 'user', parts: [{ text: query }] });
+
+                return {
+                    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${this.apiKeys.gemini}`,
+                    options: {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            system_instruction: { parts: [{ text: systemPrompt }] },
+                            contents,
+                            generationConfig: { temperature: 0.9, topP: 0.95, maxOutputTokens: 800 },
+                            safetySettings: [
+                                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' }
+                            ]
+                        })
+                    }
+                };
+            },
+            extractReply: (data) => data.candidates?.[0]?.content?.parts?.[0]?.text,
+            shouldRetry: (status) => status === 429
+        };
+    }
+
+    _groqProvider() {
+        return {
+            id: 'groq',
+            label: 'Groq',
+            model: 'llama-3.1-8b-instant',
+            buildRequest: (systemPrompt, conversation, query) => {
+                const messages = [{ role: 'system', content: systemPrompt }];
+                conversation.forEach(msg => {
+                    messages.push({ role: msg.role === 'athena' ? 'assistant' : 'user', content: msg.text });
+                });
+                messages.push({ role: 'user', content: query });
+
+                return {
+                    url: 'https://api.groq.com/openai/v1/chat/completions',
+                    options: {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.apiKeys.groq}`
+                        },
+                        body: JSON.stringify({
+                            model: 'llama-3.1-8b-instant',
+                            messages,
+                            temperature: 0.9,
+                            max_tokens: 800
+                        })
+                    }
+                };
+            },
+            extractReply: (data) => data.choices?.[0]?.message?.content,
+            shouldRetry: (status) => status === 429
+        };
+    }
+
     /* ========== Speech Recognition ========== */
+
     initSpeech() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
@@ -113,6 +204,7 @@ class Athena {
     }
 
     /* ========== Voice Output ========== */
+
     speak(text) {
         if (!this.synth) return;
 
@@ -174,6 +266,7 @@ class Athena {
     }
 
     /* ========== UI & Messages ========== */
+
     togglePanel() {
         if (this.isOpen) {
             this.closePanel();
@@ -260,6 +353,7 @@ class Athena {
     }
 
     /* ========== Quick Replies ========== */
+
     handleChipClick(query) {
         if (!this.isOpen) this.openPanel();
         this.addMessage(query, 'user');
@@ -267,6 +361,7 @@ class Athena {
     }
 
     /* ========== Chat Input ========== */
+
     handleSend() {
         const text = this.input.value.trim();
         if (!text || this.isProcessing) return;
@@ -283,13 +378,15 @@ class Athena {
         }
     }
 
-    /* ========== Gemini API ========== */
-    async processUserQuery(query, retryCount = 0) {
-        if (!this.apiKey) {
-            console.warn('Athena: No API key. Add your key to config/.env');
+    /* ========== Multi-Provider API Call ========== */
+
+    async processUserQuery(query, retryCount = 0, providerIndex = 0) {
+        if (this.providers.length === 0) {
+            console.warn('Athena: No API providers configured. Add API keys to config/config.json');
             return;
         }
 
+        // Rate limiting
         const now = Date.now();
         const timeSinceLastCall = now - this.lastCallTime;
         if (timeSinceLastCall < this.minCallInterval) {
@@ -301,60 +398,37 @@ class Athena {
         this.sendBtn.disabled = true;
         this.showTyping();
 
-        const contents = [];
-        const recentHistory = this.conversation.slice(-12);
-        recentHistory.forEach(msg => {
-            contents.push({
-                role: msg.role === 'athena' ? 'model' : 'user',
-                parts: [{ text: msg.text }]
-            });
-        });
-        contents.push({ role: 'user', parts: [{ text: query }] });
+        const provider = this.providers[providerIndex];
+        this.activeProvider = provider;
 
         try {
-            this.lastCallTime = Date.now();
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${this.apiKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: {
-                            parts: [{ text: this.getSystemPrompt() }]
-                        },
-                        contents: contents,
-                        generationConfig: {
-                            temperature: 0.9,
-                            topP: 0.95,
-                            maxOutputTokens: 800
-                        },
-                        safetySettings: [
-                            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' }
-                        ]
-                    })
-                }
+            const { url, options } = provider.buildRequest(
+                this.getSystemPrompt(),
+                this.conversation,
+                query
             );
 
-            if (response.status === 429) {
-                if (retryCount < this.maxRetries) {
-                    const delay = Math.pow(2, retryCount + 1) * 2000;
-                    this.showRetrying(retryCount + 1, this.maxRetries);
-                    await new Promise(r => setTimeout(r, delay));
-                    return this.processUserQuery(query, retryCount + 1);
-                } else {
-                    throw new Error('Rate limit exceeded after retries');
-                }
+            this.lastCallTime = Date.now();
+            const response = await fetch(url, options);
+
+            // Rate limited — retry with same provider
+            if (response.status === 429 && retryCount < this.maxRetries) {
+                const delay = Math.pow(2, retryCount + 1) * 2000;
+                this.showRetrying(retryCount + 1, this.maxRetries);
+                await new Promise(r => setTimeout(r, delay));
+                return this.processUserQuery(query, retryCount + 1, providerIndex);
             }
 
+            // Non-retryable failure — fall back to next provider
             if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
+                throw new Error(`${provider.label} error: ${response.status}`);
             }
 
             const data = await response.json();
-            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I couldn\'t process that. Could you ask again?';
+            const reply = provider.extractReply(data)
+                || 'Sorry, I couldn\'t process that. Could you ask again?';
 
-            console.log('Athena full response:', reply);
+            console.log(`Athena [${provider.label}]:`, reply);
             if (data.candidates?.[0]?.finishReason) {
                 console.log('Athena finish reason:', data.candidates[0].finishReason);
             }
@@ -366,12 +440,22 @@ class Athena {
             }
 
             this.addBotMessage(this.cleanResponse(reply));
+
         } catch (err) {
-            console.error('Athena API error:', err);
+            console.error(`Athena [${provider.label}] failed:`, err.message);
+
+            // Try next provider if available
+            const nextIndex = providerIndex + 1;
+            if (nextIndex < this.providers.length) {
+                console.log(`Athena: Falling back to ${this.providers[nextIndex].label}...`);
+                return this.processUserQuery(query, 0, nextIndex);
+            }
+
+            // All providers exhausted
             if (err.message.includes('429') || err.message.includes('Rate limit')) {
-                this.addBotMessage('I\'ve hit my API limit for now — Google\'s free tier has daily caps. Come back tomorrow or try a different question!');
+                this.addBotMessage('All AI providers have hit their limits right now. Come back later or try again tomorrow!');
             } else {
-                this.addBotMessage('Hmm, I\'m having trouble connecting right now. Could you try again in a moment?');
+                this.addBotMessage('All AI services are temporarily unavailable. Please try again in a moment.');
             }
         }
 
@@ -384,6 +468,7 @@ class Athena {
     }
 
     /* ========== System Prompt ========== */
+
     getSystemPrompt() {
         return `You are Athena, a warm, friendly AI assistant for Shanmugamani's portfolio website. You speak like a smart, enthusiastic young woman — not like a robot. You make visitors feel welcome and excited to explore. You use natural language, contractions (like "I'm", "you'll", "that's"), and occasional friendly enthusiasm.
 
@@ -442,9 +527,10 @@ RESPONSE GUIDELINES:
     }
 
     /* ========== Auto Greeting ========== */
+
     scheduleGreeting() {
         setTimeout(() => {
-            if (!this.hasGreeted && this.apiKey) {
+            if (!this.hasGreeted && this.providers.length > 0) {
                 this.hasGreeted = true;
                 this.orb.classList.add('athena-welcome-anim');
                 setTimeout(() => this.orb.classList.remove('athena-welcome-anim'), 600);
@@ -459,13 +545,14 @@ RESPONSE GUIDELINES:
         if (this.isOpen && !this.hasGreeted) {
             this.hasGreeted = true;
             this.notifDot.style.display = 'none';
-            if (this.apiKey) {
+            if (this.providers.length > 0) {
                 this.processUserQuery('hi');
             }
         }
     }
 
     /* ========== Event Binding ========== */
+
     bindEvents() {
         this.orb.addEventListener('click', () => this.handleOrbClick());
         this.closeBtn.addEventListener('click', () => this.closePanel());
