@@ -47,6 +47,7 @@ class Athena {
 
     /* ========== API Key Management ========== */
     async loadApiKey() {
+        // On localhost, try loading from .env file first
         try {
             const res = await fetch('.env');
             const content = await res.text();
@@ -54,13 +55,23 @@ class Athena {
             if (match && match[1].trim()) {
                 this.apiKey = match[1].trim();
                 console.log('Athena: API key loaded from .env');
-                // Schedule greeting now that we have the key
                 this.scheduleGreeting();
-            } else {
-                console.warn('Athena: ATHENA_API_KEY not found in .env file');
+                return;
             }
-        } catch {
-            console.warn('Athena: Could not load .env file. Create one with ATHENA_API_KEY=your_key');
+        } catch {}
+
+        // For GitHub Pages / live site: paste your Gemini API key below
+        // ⬇️⬇️⬇️  PUT YOUR API KEY HERE  ⬇️⬇️⬇️
+        this.apiKey = 'PASTE_YOUR_GEMINI_API_KEY_HERE';
+        // ⬆️⬆️⬆️  PUT YOUR API KEY HERE  ⬆️⬆️⬆️
+        // Get a free key at: https://aistudio.google.com/apikey
+        // Then restrict it by HTTP referrer in Google Cloud Console
+
+        if (this.apiKey && this.apiKey !== 'PASTE_YOUR_GEMINI_API_KEY_HERE') {
+            console.log('Athena: API key loaded from athena.js');
+            this.scheduleGreeting();
+        } else {
+            console.warn('Athena: No API key. Open athena.js and paste your Gemini API key where indicated.');
         }
     }
 
