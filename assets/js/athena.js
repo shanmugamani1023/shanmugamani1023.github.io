@@ -5,7 +5,6 @@
 
 class Athena {
     constructor() {
-        // Core elements
         this.orb = document.getElementById('athena-orb');
         this.panel = document.getElementById('athena-panel');
         this.messages = document.getElementById('athena-messages');
@@ -18,10 +17,8 @@ class Athena {
         this.waveIndicator = document.getElementById('athena-wave');
         this.notifDot = document.getElementById('athena-notif');
 
-        // API key
         this.apiKey = null;
 
-        // State
         this.isOpen = false;
         this.isListening = false;
         this.isProcessing = false;
@@ -30,48 +27,47 @@ class Athena {
         this.maxHistory = 10;
         this.pendingSpeech = null;
         this.lastCallTime = 0;
-        this.minCallInterval = 2000; // 2 seconds between calls to avoid rate limits
+        this.minCallInterval = 2000;
         this.maxRetries = 3;
 
-        // Voice
         this.recognition = null;
         this.synth = window.speechSynthesis;
         this.voice = null;
         this.voiceLoaded = false;
 
-        // Init
         this.bindEvents();
         this.initSpeech();
-        this.loadApiKey(); // loads key async, then schedules greeting
+        this.loadApiKey();
     }
 
     /* ========== API Key Management ========== */
     async loadApiKey() {
-        // On localhost, try loading from .env file first
+        // Load API key from config/.env (works on both localhost and GitHub Pages)
         try {
-            const res = await fetch('.env');
+            const res = await fetch('config/.env');
             const content = await res.text();
             const match = content.match(/^ATHENA_API_KEY=(.+)$/m);
             if (match && match[1].trim()) {
                 this.apiKey = match[1].trim();
-                console.log('Athena: API key loaded from .env');
-                this.scheduleGreeting();
-                return;
+                if (this.apiKey && this.apiKey !== 'your_gemini_api_key_here') {
+                    console.log('Athena: API key loaded from config/.env');
+                    this.scheduleGreeting();
+                    return;
+                }
             }
-        } catch {}
+        } catch {
+            console.warn('Athena: Could not load config/.env. Make sure the file exists with your API key.');
+        }
 
-        // For GitHub Pages / live site: paste your Gemini API key below
-        // ⬇️⬇️⬇️  PUT YOUR API KEY HERE  ⬇️⬇️⬇️
-        this.apiKey = 'PASTE_YOUR_GEMINI_API_KEY_HERE';
-        // ⬆️⬆️⬆️  PUT YOUR API KEY HERE  ⬆️⬆️⬆️
-        // Get a free key at: https://aistudio.google.com/apikey
-        // Then restrict it by HTTP referrer in Google Cloud Console
-
-        if (this.apiKey && this.apiKey !== 'PASTE_YOUR_GEMINI_API_KEY_HERE') {
-            console.log('Athena: API key loaded from athena.js');
-            this.scheduleGreeting();
-        } else {
-            console.warn('Athena: No API key. Open athena.js and paste your Gemini API key where indicated.');
+        // If no valid key found, show warning in console
+        if (!this.apiKey || this.apiKey === 'your_gemini_api_key_here') {
+            console.warn(
+                'Athena: No valid API key found.\n' +
+                '1. Open config/.env\n' +
+                '2. Replace your_gemini_api_key_here with your actual Gemini API key\n' +
+                '3. Get a free key at: https://aistudio.google.com/apikey\n' +
+                '4. Restrict it by HTTP referrer in Google Cloud Console'
+            );
         }
     }
 
@@ -126,10 +122,8 @@ class Athena {
     speak(text) {
         if (!this.synth) return;
 
-        // Cancel any ongoing speech
         this.synth.cancel();
 
-        // Always check available voices at call time
         const voices = this.synth.getVoices();
         if (voices.length > 0) {
             this.voice = voices.find(v =>
@@ -144,7 +138,6 @@ class Athena {
         }
 
         if (!this.voiceLoaded) {
-            // Voices not loaded yet — queue speech for when they arrive
             this.pendingSpeech = text;
             this.synth.onvoiceschanged = () => {
                 const loadedVoices = this.synth.getVoices();
@@ -157,7 +150,6 @@ class Athena {
                         v.lang.startsWith('en')
                     ) || loadedVoices.find(v => v.lang.startsWith('en')) || loadedVoices[0];
                     this.voiceLoaded = true;
-                    // Speak the queued text now that voice is ready
                     if (this.pendingSpeech) {
                         const queued = this.pendingSpeech;
                         this.pendingSpeech = null;
@@ -245,7 +237,6 @@ class Athena {
 
     hideTyping() {
         this.typingIndicator.classList.remove('visible');
-        // Reset retry state so typing dots work correctly next time
         const dots = this.typingIndicator.querySelector('.athena-typing-dots');
         if (dots) dots.style.display = '';
         const retryEl = this.typingIndicator.querySelector('.athena-retry-msg');
@@ -253,12 +244,10 @@ class Athena {
     }
 
     showRetrying(current, total) {
-        // Silent retry notification — hide typing dots, show retry status in a separate element
         const dotSpans = this.typingIndicator.querySelector('.athena-typing-dots');
         if (dotSpans) {
             dotSpans.style.display = 'none';
         }
-        // Add or update retry text
         let retryEl = this.typingIndicator.querySelector('.athena-retry-msg');
         if (!retryEl) {
             retryEl = document.createElement('div');
@@ -303,11 +292,10 @@ class Athena {
     /* ========== Gemini API ========== */
     async processUserQuery(query, retryCount = 0) {
         if (!this.apiKey) {
-            console.warn('Athena: No API key. Create .env file with ATHENA_API_KEY=your_key');
+            console.warn('Athena: No API key. Add your key to config/.env');
             return;
         }
 
-        // Rate limit: ensure minimum gap between API calls
         const now = Date.now();
         const timeSinceLastCall = now - this.lastCallTime;
         if (timeSinceLastCall < this.minCallInterval) {
@@ -319,10 +307,7 @@ class Athena {
         this.sendBtn.disabled = true;
         this.showTyping();
 
-        // Build conversation history
         const contents = [];
-
-        // Add recent conversation history (max 6 exchanges to save tokens)
         const recentHistory = this.conversation.slice(-12);
         recentHistory.forEach(msg => {
             contents.push({
@@ -330,8 +315,6 @@ class Athena {
                 parts: [{ text: msg.text }]
             });
         });
-
-        // Add current query
         contents.push({ role: 'user', parts: [{ text: query }] });
 
         try {
@@ -360,9 +343,8 @@ class Athena {
             );
 
             if (response.status === 429) {
-                // Rate limited — retry with backoff
                 if (retryCount < this.maxRetries) {
-                    const delay = Math.pow(2, retryCount + 1) * 2000; // 4s, 8s, 16s
+                    const delay = Math.pow(2, retryCount + 1) * 2000;
                     this.showRetrying(retryCount + 1, this.maxRetries);
                     await new Promise(r => setTimeout(r, delay));
                     return this.processUserQuery(query, retryCount + 1);
@@ -378,13 +360,11 @@ class Athena {
             const data = await response.json();
             const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I couldn\'t process that. Could you ask again?';
 
-            // Log response for debugging
             console.log('Athena full response:', reply);
             if (data.candidates?.[0]?.finishReason) {
                 console.log('Athena finish reason:', data.candidates[0].finishReason);
             }
 
-            // Store in conversation history (capped)
             this.conversation.push({ role: 'user', text: query });
             this.conversation.push({ role: 'athena', text: reply });
             if (this.conversation.length > this.maxHistory) {
@@ -406,7 +386,6 @@ class Athena {
     }
 
     cleanResponse(text) {
-        // Remove asterisk-wrapped text (Gemini sometimes uses *emphasis*)
         return text.replace(/\*([^*]+)\*/g, '$1').trim();
     }
 
@@ -470,16 +449,11 @@ RESPONSE GUIDELINES:
 
     /* ========== Auto Greeting ========== */
     scheduleGreeting() {
-        // Wait 3.5 seconds after key loads, then proactively greet!
         setTimeout(() => {
             if (!this.hasGreeted && this.apiKey) {
                 this.hasGreeted = true;
-
-                // Animate orb to draw attention
                 this.orb.classList.add('athena-welcome-anim');
                 setTimeout(() => this.orb.classList.remove('athena-welcome-anim'), 600);
-
-                // Proactively open and greet the visitor
                 this.openPanel();
                 this.processUserQuery('hi');
             }
@@ -488,7 +462,6 @@ RESPONSE GUIDELINES:
 
     handleOrbClick() {
         this.togglePanel();
-        // If opening for the first time and haven't greeted yet
         if (this.isOpen && !this.hasGreeted) {
             this.hasGreeted = true;
             this.notifDot.style.display = 'none';
@@ -500,30 +473,18 @@ RESPONSE GUIDELINES:
 
     /* ========== Event Binding ========== */
     bindEvents() {
-        // Orb toggle
         this.orb.addEventListener('click', () => this.handleOrbClick());
-
-        // Close button
         this.closeBtn.addEventListener('click', () => this.closePanel());
-
-        // Send button
         this.sendBtn.addEventListener('click', () => this.handleSend());
-
-        // Input enter key
         this.input.addEventListener('keydown', (e) => this.handleInputKeydown(e));
-
-        // Mic button
         this.micBtn.addEventListener('click', () => this.toggleListening());
 
-        // Quick reply chips
         this.chips.forEach((chip) => {
             chip.addEventListener('click', () => {
                 const query = chip.dataset.query;
                 this.handleChipClick(query);
             });
         });
-
-        // No setup dialog — key is read from .env file
     }
 }
 
@@ -531,7 +492,6 @@ RESPONSE GUIDELINES:
    INITIALIZE
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    // Only initialize if the orb element exists
     if (document.getElementById('athena-orb')) {
         window.athena = new Athena();
     }

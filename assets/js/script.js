@@ -53,15 +53,12 @@ class ParticleSystem {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.particles.forEach((p) => {
-            // Move
             p.x += p.vx;
             p.y += p.vy;
 
-            // Bounce
             if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
             if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
 
-            // Mouse interaction
             if (this.mouse.x !== null) {
                 const dx = p.x - this.mouse.x;
                 const dy = p.y - this.mouse.y;
@@ -73,14 +70,12 @@ class ParticleSystem {
                 }
             }
 
-            // Draw particle
             this.ctx.beginPath();
             this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             this.ctx.fillStyle = `rgba(0, 212, 255, ${p.opacity})`;
             this.ctx.fill();
         });
 
-        // Draw connections
         for (let i = 0; i < this.particles.length; i++) {
             for (let j = i + 1; j < this.particles.length; j++) {
                 const dx = this.particles[i].x - this.particles[j].x;
@@ -199,7 +194,6 @@ class CounterAnimator {
         const update = (now) => {
             const elapsed = now - start;
             const progress = Math.min(elapsed / duration, 1);
-            // Ease out cubic
             const eased = 1 - Math.pow(1 - progress, 3);
             el.textContent = Math.floor(target * eased);
 
@@ -246,14 +240,12 @@ class Navbar {
     }
 
     onScroll() {
-        // Scrolled style
         if (window.scrollY > 50) {
             this.navbar.classList.add('scrolled');
         } else {
             this.navbar.classList.remove('scrolled');
         }
 
-        // Active section
         let current = '';
         this.sections.forEach((section) => {
             const top = section.offsetTop - 120;
@@ -282,7 +274,6 @@ class ThemeManager {
     }
 
     init() {
-        // Restore saved preference or default to dark
         const saved = localStorage.getItem(this.storageKey);
         if (saved === 'light') {
             document.documentElement.setAttribute('data-theme', 'light');
@@ -303,7 +294,6 @@ class ThemeManager {
             localStorage.setItem(this.storageKey, 'light');
         }
 
-        // Add a subtle rotation animation to the toggle icon
         this.toggle.style.transform = 'rotate(180deg)';
         setTimeout(() => {
             this.toggle.style.transform = '';
@@ -398,11 +388,9 @@ function initHeroAnimations() {
    INITIALIZATION
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    // Particles
     const canvas = document.getElementById('particles-canvas');
     if (canvas) new ParticleSystem(canvas);
 
-    // Typing effect
     const typedEl = document.getElementById('typed-text');
     if (typedEl) {
         new TypeWriter(typedEl, [
@@ -413,24 +401,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ]);
     }
 
-    // Navbar
     new Navbar();
-
-    // Scroll animations
     new ScrollAnimator();
-
-    // Counter animations
     new CounterAnimator();
-
-    // Theme toggle
     new ThemeManager();
-
-    // Project filter
     new ProjectFilter();
-
-    // Contact form
     new ContactForm();
-
-    // Hero animation on load
     initHeroAnimations();
 });
