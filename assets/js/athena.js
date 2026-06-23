@@ -19,7 +19,7 @@ class Athena {
 
         // Cloudflare Worker proxy URL
         // TODO: Replace with your actual Cloudflare Worker URL after deployment
-        this.proxyUrl = 'https://athena-proxy.YOUR_SUBDOMAIN.workers.dev';
+        this.proxyUrl = 'https://athena-proxy.shandev1023.workers.dev';
 
         this.isOpen = false;
         this.isListening = false;
