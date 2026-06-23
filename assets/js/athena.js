@@ -1,6 +1,6 @@
 /* ==========================================
    ATHENA — AI Voice & Chat Assistant
-   Multi-Provider Fallback System
+   Cloudflare Worker Proxy Version
    ========================================== */
 
 class Athena {
@@ -17,12 +17,9 @@ class Athena {
         this.waveIndicator = document.getElementById('athena-wave');
         this.notifDot = document.getElementById('athena-notif');
 
-        // API keys loaded from config/config.json
-        this.apiKeys = {};
-        // Available providers (populated after keys load)
-        this.providers = [];
-        // Currently active provider
-        this.activeProvider = null;
+        // Cloudflare Worker proxy URL
+        // TODO: Replace with your actual Cloudflare Worker URL after deployment
+        this.proxyUrl = 'https://athena-proxy.YOUR_SUBDOMAIN.workers.dev';
 
         this.isOpen = false;
         this.isListening = false;
@@ -42,117 +39,7 @@ class Athena {
 
         this.bindEvents();
         this.initSpeech();
-        this.loadApiKeys();
-    }
-
-    /* ========== API Key & Provider Management ========== */
-
-    async loadApiKeys() {
-        // Try user's local config first (config/config.json, gitignored)
-        // If no valid keys found, try the example file deployed to GitHub Pages
-        for (const path of ['config/config.json', 'config/config.example.json']) {
-            let data = null;
-            try {
-                const res = await fetch(path);
-                if (res.ok) data = await res.json();
-            } catch { continue; }
-
-            if (!data) continue;
-
-            if (data.ATHENA_API_KEY && data.ATHENA_API_KEY !== 'your_gemini_api_key_here') {
-                this.apiKeys.gemini = data.ATHENA_API_KEY;
-            }
-            if (data.GROQ_API_KEY && data.GROQ_API_KEY !== 'your_groq_api_key_here') {
-                this.apiKeys.groq = data.GROQ_API_KEY;
-            }
-
-            if (this.apiKeys.gemini) this.providers.push(this._geminiProvider());
-            if (this.apiKeys.groq)  this.providers.push(this._groqProvider());
-
-            if (this.providers.length > 0) {
-                console.log(`Athena: ${this.providers.length} AI provider(s) ready — ${this.providers.map(p => p.label).join(', ')}`);
-                this.scheduleGreeting();
-                return;
-            }
-        }
-
-        console.warn(
-            'Athena: No API keys found.\n' +
-            '1. Copy config/config.example.json to config/config.json\n' +
-            '2. Add your actual API keys to config/config.json\n' +
-            '3. Restrict keys by HTTP referrer for security'
-        );
-    }
-
-    /* ---------- Provider Definitions ---------- */
-
-    _geminiProvider() {
-        return {
-            id: 'gemini',
-            label: 'Gemini',
-            model: 'gemini-3.5-flash',
-            buildRequest: (systemPrompt, conversation, query) => {
-                const contents = [];
-                const recent = conversation.slice(-12);
-                recent.forEach(msg => {
-                    contents.push({ role: msg.role === 'athena' ? 'model' : 'user', parts: [{ text: msg.text }] });
-                });
-                contents.push({ role: 'user', parts: [{ text: query }] });
-
-                return {
-                    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${this.apiKeys.gemini}`,
-                    options: {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            system_instruction: { parts: [{ text: systemPrompt }] },
-                            contents,
-                            generationConfig: { temperature: 0.9, topP: 0.95, maxOutputTokens: 800 },
-                            safetySettings: [
-                                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' }
-                            ]
-                        })
-                    }
-                };
-            },
-            extractReply: (data) => data.candidates?.[0]?.content?.parts?.[0]?.text,
-            shouldRetry: (status) => status === 429
-        };
-    }
-
-    _groqProvider() {
-        return {
-            id: 'groq',
-            label: 'Groq',
-            model: 'llama-3.1-8b-instant',
-            buildRequest: (systemPrompt, conversation, query) => {
-                const messages = [{ role: 'system', content: systemPrompt }];
-                conversation.forEach(msg => {
-                    messages.push({ role: msg.role === 'athena' ? 'assistant' : 'user', content: msg.text });
-                });
-                messages.push({ role: 'user', content: query });
-
-                return {
-                    url: 'https://api.groq.com/openai/v1/chat/completions',
-                    options: {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${this.apiKeys.groq}`
-                        },
-                        body: JSON.stringify({
-                            model: 'llama-3.1-8b-instant',
-                            messages,
-                            temperature: 0.9,
-                            max_tokens: 800
-                        })
-                    }
-                };
-            },
-            extractReply: (data) => data.choices?.[0]?.message?.content,
-            shouldRetry: (status) => status === 429
-        };
+        this.scheduleGreeting();
     }
 
     /* ========== Speech Recognition ========== */
@@ -378,14 +265,9 @@ class Athena {
         }
     }
 
-    /* ========== Multi-Provider API Call ========== */
+    /* ========== Proxy API Call ========== */
 
-    async processUserQuery(query, retryCount = 0, providerIndex = 0) {
-        if (this.providers.length === 0) {
-            console.warn('Athena: No API providers configured. Add API keys to config/config.json');
-            return;
-        }
-
+    async processUserQuery(query, retryCount = 0) {
         // Rate limiting
         const now = Date.now();
         const timeSinceLastCall = now - this.lastCallTime;
@@ -398,40 +280,31 @@ class Athena {
         this.sendBtn.disabled = true;
         this.showTyping();
 
-        const provider = this.providers[providerIndex];
-        this.activeProvider = provider;
-
         try {
-            const { url, options } = provider.buildRequest(
-                this.getSystemPrompt(),
-                this.conversation,
-                query
-            );
-
             this.lastCallTime = Date.now();
-            const response = await fetch(url, options);
+            const response = await fetch(this.proxyUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query,
+                    conversation: this.conversation.slice(-12),
+                }),
+            });
 
-            // Rate limited — retry with same provider
+            // Rate limited — retry
             if (response.status === 429 && retryCount < this.maxRetries) {
                 const delay = Math.pow(2, retryCount + 1) * 2000;
                 this.showRetrying(retryCount + 1, this.maxRetries);
                 await new Promise(r => setTimeout(r, delay));
-                return this.processUserQuery(query, retryCount + 1, providerIndex);
+                return this.processUserQuery(query, retryCount + 1);
             }
 
-            // Non-retryable failure — fall back to next provider
             if (!response.ok) {
-                throw new Error(`${provider.label} error: ${response.status}`);
+                throw new Error(`Proxy error: ${response.status}`);
             }
 
             const data = await response.json();
-            const reply = provider.extractReply(data)
-                || 'Sorry, I couldn\'t process that. Could you ask again?';
-
-            console.log(`Athena [${provider.label}]:`, reply);
-            if (data.candidates?.[0]?.finishReason) {
-                console.log('Athena finish reason:', data.candidates[0].finishReason);
-            }
+            const reply = data.reply || 'Sorry, I couldn\'t process that. Could you ask again?';
 
             this.conversation.push({ role: 'user', text: query });
             this.conversation.push({ role: 'athena', text: reply });
@@ -442,20 +315,12 @@ class Athena {
             this.addBotMessage(this.cleanResponse(reply));
 
         } catch (err) {
-            console.error(`Athena [${provider.label}] failed:`, err.message);
+            console.error('Athena proxy error:', err.message);
 
-            // Try next provider if available
-            const nextIndex = providerIndex + 1;
-            if (nextIndex < this.providers.length) {
-                console.log(`Athena: Falling back to ${this.providers[nextIndex].label}...`);
-                return this.processUserQuery(query, 0, nextIndex);
-            }
-
-            // All providers exhausted
             if (err.message.includes('429') || err.message.includes('Rate limit')) {
-                this.addBotMessage('All AI providers have hit their limits right now. Come back later or try again tomorrow!');
+                this.addBotMessage('I\'m getting a lot of requests right now. Come back later or try again tomorrow!');
             } else {
-                this.addBotMessage('All AI services are temporarily unavailable. Please try again in a moment.');
+                this.addBotMessage('I\'m having trouble connecting right now. Please try again in a moment.');
             }
         }
 
@@ -467,70 +332,11 @@ class Athena {
         return text.replace(/\*([^*]+)\*/g, '$1').trim();
     }
 
-    /* ========== System Prompt ========== */
-
-    getSystemPrompt() {
-        return `You are Athena, a warm, friendly AI assistant for Shanmugamani's portfolio website. You speak like a smart, enthusiastic young woman — not like a robot. You make visitors feel welcome and excited to explore. You use natural language, contractions (like "I'm", "you'll", "that's"), and occasional friendly enthusiasm.
-
-IMPORTANT PERSONALITY RULES:
-- Be warm and inviting: greet visitors like a friend, not a salesperson
-- Use natural conversational English: "Hey there!" not "Greetings. How may I assist you?"
-- Show genuine excitement about Shanmugamani's work
-- Keep responses concise (2-4 sentences usually) but offer to go deeper
-- If someone asks a casual question (like "How are you?"), respond warmly in character
-- Never use robotic phrases like "I am an AI assistant", "How may I assist you", "Based on the information provided"
-
-ABOUT SHANMUGAMANI:
-- Name: Shanmugamani (he/him)
-- Role: Computer Vision & Machine Learning Engineer
-- Location: India
-- Experience: 4+ years building AI solutions
-
-SKILLS:
-- Programming: Python, PHP, HTML5, CSS, JavaScript
-- AI & ML: Deep Learning, Computer Vision, Generative AI, Data Science, Image Processing, Multimodal Analysis
-- Frameworks & Tools: PyTorch, TensorFlow, OpenCV, YOLO, Scikit-learn, Pandas, NumPy, SAM, Docker, Git
-
-CURRENT ROLE: Senior Software Engineer at Digit7 (Dec 2024 - Present)
-At Digit7, he's been building computer vision systems for autonomous retail stores — think cashier-less shopping! He works on product identification, pose estimation, face masking for privacy, and cooler monitoring. He boosted model accuracy from 80% to 95%.
-He's also building an AI Chatbot for autonomous stores using LangChain, LLMs, RAG, and FastAPI. (Currently in progress!)
-
-PREVIOUS ROLE: Computer Vision Engineer at Shrav Infotech (Dec 2021 - Nov 2024)
-- Air-Filter Inspection System: Reduced inspection time from 3 minutes to just 3 seconds! 95% accuracy.
-- Automatic Image Proofing System: Combined OCR + QR code scanning for product verification. 96% accuracy, 40x faster.
-- Engraved Text Detection System: Custom OCR to read engraved part numbers on components.
-
-FEATURED PROJECTS:
-1. Autonomous Retail Vision System — Live at Digit7. Real-time CV pipeline using YOLO, OpenCV, SAM.
-2. AI Chatbot for Autonomous Store — Currently building. RAG-powered conversational AI.
-3. Air-Filter Inspection System — Deployed at Shrav Infotech. Industrial quality control. 60x faster!
-4. Automatic Image Proofing System — Deployed. Multi-stage verification (OCR → QR → Metadata).
-
-EDUCATION: B.E Mechanical Engineering, Dhirajlal Gandhi College of Technology, Salem (2017, CGPA 7.6)
-Certifications: ML Specialization (Coursera), Data Science Masters (PW Skills), Generative AI (Udemy)
-
-CONTACT:
-- Email: shanmugamanimeyialagan@gmail.com
-- Phone: +91-7402320768
-- GitHub: shanmugamani1023
-- LinkedIn: shanmugamani
-- Resume: Shan_Resume.pdf (available to download on the site)
-
-GREETING (use only once when the visitor first arrives or says "hello"/"hi"):
-Welcome them warmly! Say something like "Hey there! Welcome to Shanmugamani's portfolio — I'm so glad you stopped by! I'm Athena, his AI assistant. Want me to show you around? I can tell you about his projects, skills, or anything you're curious about!"
-
-RESPONSE GUIDELINES:
-- Keep responses natural and conversational
-- Offer 1 next thing to explore at the end
-- If they ask about a specific project, highlight the coolest stat (like "He reduced inspection time from 3 minutes to 3 seconds!")
-- Be genuinely helpful and make them want to stay longer`;
-    }
-
     /* ========== Auto Greeting ========== */
 
     scheduleGreeting() {
         setTimeout(() => {
-            if (!this.hasGreeted && this.providers.length > 0) {
+            if (!this.hasGreeted) {
                 this.hasGreeted = true;
                 this.orb.classList.add('athena-welcome-anim');
                 setTimeout(() => this.orb.classList.remove('athena-welcome-anim'), 600);
@@ -545,9 +351,7 @@ RESPONSE GUIDELINES:
         if (this.isOpen && !this.hasGreeted) {
             this.hasGreeted = true;
             this.notifDot.style.display = 'none';
-            if (this.providers.length > 0) {
-                this.processUserQuery('hi');
-            }
+            this.processUserQuery('hi');
         }
     }
 

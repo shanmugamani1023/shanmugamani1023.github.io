@@ -10,5 +10,8 @@ nul
 # Node (if any)
 node_modules/
 
-# API keys — real config stays local, only example file is committed
-config/config.json
+# Cloudflare Worker (deployed separately, not part of GitHub Pages site)
+cloudflare-worker/
+
+# API keys config (no longer needed, keys are on Cloudflare)
+config/
