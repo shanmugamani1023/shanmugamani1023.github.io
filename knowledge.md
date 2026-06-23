@@ -19,12 +19,17 @@ This is a static portfolio website for **Shanmugamani**, a Computer Vision & Mac
 │   └── js/
 │       ├── script.js       # Portfolio interactivity (particles, navbar, theme, filters)
 │       └── athena.js       # Athena AI engine (voice, chat, Gemini API)
+├── cloudflare-worker/         # Deployed separately — proxy worker
+│   ├── worker.js               # Athena proxy (routes to Gemini / Groq)
+│   └── wrangler.toml
 ├── config/
-│   └── .env                # Gemini API key (edit to enable Athena)
+│   └── config.json             # Local API keys (gitignored)
+├── .agents/
+│   └── types/
 ├── favicon.svg
 ├── Shan_Resume.pdf
 ├── knowledge.md
-└── README.md               # Full setup & deployment docs
+└── README.md
 ```
 
 ## Key Files
@@ -32,13 +37,14 @@ This is a static portfolio website for **Shanmugamani**, a Computer Vision & Mac
 - **`assets/css/style.css`** — Dark-themed design system with CSS custom properties. Glassmorphism, cyan/purple gradient, scroll animations.
 - **`assets/css/athena.css`** — JARVIS-style holographic UI: glowing orb, chat panel, voice wave, typing dots.
 - **`assets/js/script.js`** — OOP-style vanilla JS classes: `ParticleSystem`, `TypeWriter`, `ScrollAnimator`, `CounterAnimator`, `Navbar`, `ThemeManager`, `ProjectFilter`, `ContactForm`.
-- **`assets/js/athena.js`** — `Athena` class: voice recognition (Chrome), speech synthesis, Gemini 3.5 Flash API, conversation management, retry logic.
-- **`config/.env`** — Contains `ATHENA_API_KEY=your_key`. Committed to repo so it works on GitHub Pages.
+- **`assets/js/athena.js`** — `Athena` class: voice recognition (Chrome), speech synthesis, Cloudflare Worker proxy calls, conversation management, retry logic.
+- **`cloudflare-worker/worker.js`** — Serverless worker: routes queries to Gemini 2.0 Flash or Groq (Llama 3.1) with secure API keys.
+- **`config/config.json`** — Local only; contains `ATHENA_API_KEY` and `GROQ_API_KEY`. Gitignored, never committed.
 
 ## Athena Setup
-1. Get a free Gemini API key from https://aistudio.google.com/apikey
-2. Edit `config/.env` — replace `your_gemini_api_key_here` with your actual key
-3. Restrict the key by HTTP referrer in Google Cloud Console
+1. Deploy the Cloudflare Worker with your API keys as secrets: `npx wrangler secret put ATHENA_API_KEY`
+2. Update the proxy URL in `assets/js/athena.js`
+3. See README.md for full setup instructions
 
 ## Conventions
 - **No frameworks/libraries** — Pure vanilla JS; no dependencies beyond Google Fonts.
