@@ -123,4 +123,4 @@ Athena is trained on your portfolio data and can answer questions about:
 
 ## 🔒 API Key Security
 
-The API key in `config/.env` is committed to the repository and is publicly visible on the client side. This is expected for a client-side-only app. **Always restrict the key by HTTP referrer** in Google Cloud Console to prevent abuse from other domains.
+API keys are stored securely as Cloudflare Worker secrets and are never exposed in the client-side code or repository. The Athena AI assistant communicates through a Cloudflare Worker proxy (`athena-proxy`) which adds API keys server-side.
