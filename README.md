@@ -4,7 +4,7 @@ Personal portfolio website for **Shanmugamani**, a Computer Vision & Machine Lea
 
 ## 🌐 Live Site
 
-**https://shanmugamani.dev**
+**https://shanmugamani1023.github.io/**
 
 ## 📁 Project Structure
 
